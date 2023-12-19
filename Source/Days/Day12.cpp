@@ -68,12 +68,12 @@ namespace std {
 
 namespace
 {
-    std::unordered_map<Row, uint64_t> Cache;
+    std::unordered_map<Row, uint64_t> cache;
 
-    uint64_t FindPossibleArrangements(Row row)
+    uint64_t FindPossibleArrangements(Row row, std::unordered_map<Row, uint64_t>& cache)
     {
-        const auto& entry = Cache.find(row);
-        if (entry != Cache.end())
+        const auto& entry = cache.find(row);
+        if (entry != cache.end())
         {
             return entry->second;
         }
@@ -83,20 +83,20 @@ namespace
             if (row.SpringStates[0] == SpringState::OPERATIONAL)
             {
                 row.SpringStates.erase(row.SpringStates.begin());
-                uint64_t arrangements = FindPossibleArrangements(row);
-                Cache[row] = arrangements;
+                uint64_t arrangements = FindPossibleArrangements(row, cache);
+                cache[row] = arrangements;
 
                 return arrangements;
             }
             else if (row.SpringStates[0] == SpringState::UNKNOWN)
             {
                 row.SpringStates[0] = SpringState::OPERATIONAL;
-                uint64_t operationalArrangements = FindPossibleArrangements(row);
-                Cache[row] = operationalArrangements;
+                uint64_t operationalArrangements = FindPossibleArrangements(row, cache);
+                cache[row] = operationalArrangements;
 
                 row.SpringStates[0] = SpringState::DAMAGED;
-                uint64_t damagedArrangements = FindPossibleArrangements(row);
-                Cache[row] = damagedArrangements;
+                uint64_t damagedArrangements = FindPossibleArrangements(row, cache);
+                cache[row] = damagedArrangements;
 
                 return operationalArrangements + damagedArrangements;
             }
@@ -112,12 +112,12 @@ namespace
                     else if (row.SpringStates[i] == SpringState::UNKNOWN)
                     {
                         row.SpringStates[i] = SpringState::OPERATIONAL;
-                        uint64_t operationalArrangements = FindPossibleArrangements(row);
-                        Cache[row] = operationalArrangements;
+                        uint64_t operationalArrangements = FindPossibleArrangements(row, cache);
+                        cache[row] = operationalArrangements;
 
                         row.SpringStates[i] = SpringState::DAMAGED;
-                        uint64_t damagedArrangements = FindPossibleArrangements(row);
-                        Cache[row] = damagedArrangements;
+                        uint64_t damagedArrangements = FindPossibleArrangements(row, cache);
+                        cache[row] = damagedArrangements;
 
                         return operationalArrangements + damagedArrangements;
                     }
@@ -132,8 +132,8 @@ namespace
                     row.SpringStates.erase(row.SpringStates.begin(), row.SpringStates.begin() + numDamaged);
                     row.DamagedGroups.erase(row.DamagedGroups.begin());
 
-                    uint64_t arrangements = FindPossibleArrangements(row);
-                    Cache[row] = arrangements;
+                    uint64_t arrangements = FindPossibleArrangements(row, cache);
+                    cache[row] = arrangements;
 
                     return arrangements;
                 }
@@ -230,11 +230,13 @@ namespace
 
         for (int i = 0; i < numRows; ++i)
         {
+            std::unordered_map<Row, uint64_t> cache;
+
             Row& row = rowList[i];
 
             printf("Processing row %d of %d...\n", i, numRows);
-            uint64_t possibleArrangements = FindPossibleArrangements(row);
-            Cache[row] = possibleArrangements;
+            uint64_t possibleArrangements = FindPossibleArrangements(row, cache);
+            cache[row] = possibleArrangements;
 
             sumArrangements += possibleArrangements;
         }
