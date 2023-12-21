@@ -4,7 +4,7 @@
 #define STRINGIFY(x) #x
 #define STR(x) STRINGIFY(x)
 
-#define CURRENT_DAY Day13    //Cos I'm lazy.
+#define CURRENT_DAY Day14    //Cos I'm lazy.
 
 #include STR(Days/CURRENT_DAY.h)
 
